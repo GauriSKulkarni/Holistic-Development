@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindPreneur | Level 3.1 Launch Sequence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Exact palette from index.html[cite: 3] */
+            --bg-color: #030014;
+            --text-primary: #ffffff;
+            --text-muted: #8b8b93;
+            --accent-1: #4f46e5;
+            --accent-2: #ec4899;
+            --accent-3: #06b6d4;
+            --danger: #ef4444;
+            --success: #10b981;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-primary);
+            min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; position: relative;
+        }
+
+        /* Ambient Background[cite: 3] */
+        .ambient-background { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; z-index: -1; background: var(--bg-color); }
+        .glow-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4; animation: float 20s infinite alternate; }
+        .orb-1 { width: 600px; height: 600px; background: var(--accent-1); top: -200px; left: -100px; }
+        .orb-2 { width: 500px; height: 500px; background: var(--accent-2); bottom: -150px; right: -50px; }
+        .orb-3 { width: 400px; height: 400px; background: var(--accent-3); top: 40%; left: 50%; transform: translate(-50%, -50%); }
+
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(100px, 100px) scale(1.1); } 100% { transform: translate(-50px, -50px) scale(0.9); } }
+
+        /* Screen Shake Animation for Errors */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shake { animation: shake 0.4s; border-color: var(--danger) !important; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4) !important; }
+
+        /* Navbar / HUD */
+        nav { width: 100%; padding: 1.5rem 5%; display: flex; justify-content: space-between; align-items: center; z-index: 10; border-bottom: 1px solid var(--glass-border); background: rgba(3, 0, 20, 0.6); backdrop-filter: blur(12px); }
+        .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-primary); text-decoration: none; }
+        
+        .hud { display: none; gap: 40px; align-items: center; }
+        .hud-item { display: flex; flex-direction: column; align-items: flex-end; }
+        .hud-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 4px; }
+        .hud-value { font-size: 1.8rem; font-weight: 700; font-family: monospace; }
+        .hud-value.timer { color: var(--accent-3); text-shadow: 0 0 10px rgba(6, 182, 212, 0.5); }
+        .hud-value.timer.warning { color: var(--danger); text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); animation: pulseTimer 1s infinite; }
+        
+        @keyframes pulseTimer { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Health Bar */
+        .health-container { width: 200px; }
+        .health-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .health-fill { height: 100%; width: 100%; background: var(--success); transition: width 0.3s, background-color 0.3s; box-shadow: 0 0 10px var(--success); }
+
+        .container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; z-index: 10; width: 100%; max-width: 1000px; margin: 0 auto; }
+
+        /* Screens */
+        .screen { display: none; width: 100%; animation: fadeIn 0.4s ease; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+        .title { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; text-align: center; margin-bottom: 1rem; background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 1.2rem; color: var(--text-muted); text-align: center; margin-bottom: 3rem; max-width: 600px; line-height: 1.6; }
+
+        /* Selection Cards */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; width: 100%; max-width: 800px; }
+        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 3rem 2rem; border-radius: 16px; text-align: center; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease; }
+        .glass-card:hover { transform: translateY(-5px); border-color: var(--accent-1); box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2); }
+        .glass-card h3 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--text-primary); }
+        .glass-card p { color: var(--text-muted); line-height: 1.5; font-size: 1rem; }
+
+        /* Cockpit Console */
+        .console-panel { background: rgba(0, 0, 0, 0.6); border: 1px solid var(--accent-1); border-radius: 16px; width: 100%; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(16px); box-shadow: inset 0 0 30px rgba(79, 70, 229, 0.1); }
+        
+        .console-header { background: rgba(79, 70, 229, 0.2); padding: 15px 30px; border-bottom: 1px solid var(--accent-1); display: flex; justify-content: space-between; align-items: center; }
+        .step-indicator { color: var(--accent-3); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; }
+        .crisis-title { color: #fff; font-size: 1.2rem; font-weight: bold; }
+
+        .console-body { padding: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        
+        /* Terminal Text (Typewriter) */
+        .terminal-display { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); padding: 25px; border-radius: 12px; font-family: monospace; font-size: 1.1rem; line-height: 1.6; color: #a5b4fc; height: 100%; display: flex; flex-direction: column; }
+        .terminal-cursor { display: inline-block; width: 10px; height: 1.2rem; background: var(--accent-3); animation: blink 1s step-end infinite; vertical-align: bottom; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Input Matrix (Dynamic Controls) */
+        .input-matrix { display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+
+        /* Keypad Mode */
+        .keypad-display { background: #000; border: 2px solid var(--accent-3); padding: 15px; border-radius: 8px; text-align: right; font-size: 2rem; font-family: monospace; color: var(--accent-3); letter-spacing: 2px; min-height: 70px; margin-bottom: 10px; }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .key-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; font-size: 1.5rem; font-family: monospace; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.1s; }
+        .key-btn:active { background: var(--accent-3); color: #000; transform: scale(0.95); }
+        .key-btn.action { background: rgba(79, 70, 229, 0.2); border-color: var(--accent-1); color: #a5b4fc; }
+
+        /* Switches Mode */
+        .switch-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .switch-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; transition: 0.2s; }
+        .switch-row.on { background: rgba(16, 185, 129, 0.15); border-color: var(--success); }
+        .switch-label { font-size: 1rem; font-weight: 500; }
+        .switch-indicator { width: 40px; height: 20px; border-radius: 10px; background: rgba(255,255,255,0.1); position: relative; transition: 0.3s; }
+        .switch-indicator::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: 0.3s; }
+        .switch-row.on .switch-indicator { background: var(--success); }
+        .switch-row.on .switch-indicator::after { transform: translateX(20px); }
+
+        /* Sequence Router Mode */
+        .sequence-dock { display: flex; gap: 10px; margin-bottom: 20px; min-height: 60px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; border: 1px dashed var(--glass-border); }
+        .seq-slot { flex: 1; border-bottom: 2px solid var(--accent-1); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; color: var(--accent-3); text-align: center; }
+        .seq-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; font-size: 0.9rem; transition: 0.2s; }
+        .seq-btn:hover { background: rgba(255,255,255,0.1); }
+        .seq-btn.used { opacity: 0.3; pointer-events: none; }
+
+        .execute-btn { background: var(--accent-1); color: #fff; font-size: 1.2rem; font-weight: 700; padding: 1.5rem; border: none; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; width: 100%; margin-top: 20px; box-shadow: 0 0 20px rgba(79, 70, 229, 0.4); }
+        .execute-btn:hover { background: #6366f1; box-shadow: 0 0 30px rgba(79, 70, 229, 0.6); }
+
+        /* Feedback Overlay */
+        .msg-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 2px solid var(--danger); color: var(--danger); padding: 2rem 4rem; border-radius: 12px; font-size: 2rem; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; display: none; z-index: 200; box-shadow: 0 0 50px rgba(239, 68, 68, 0.5); text-align: center; }
+        .msg-overlay.success { border-color: var(--success); color: var(--success); box-shadow: 0 0 50px rgba(16, 185, 129, 0.5); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 900px) { .console-body { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <nav>
+        <div class="logo">MindPreneur</div>
+        <div class="hud" id="main-hud">
+            <div class="hud-item health-container">
+                <div class="hud-label">Startup Integrity</div>
+                <div class="health-bar-bg"><div class="health-fill" id="health-bar"></div></div>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">Time to Impact</span>
+                <span class="hud-value timer" id="timer-display">00:60</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="msg-overlay" id="status-msg">SYSTEM FAILURE</div>
+
+    <main class="container">
+        
+        <!-- Screen 1: Age Selection -->
+        <div class="screen active" id="screen-age">
+            <h1 class="title">Command Center Initialization</h1>
+            <p class="subtitle">Select your cognitive clearance. Warning: The Launch Sequence does not permit failure. Mistakes result in structural damage.</p>
+            <div class="card-grid">
+                <div class="glass-card" onclick="startSequence('junior')">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <h3>Level: Rookie (7th - 10th)</h3>
+                    <p>Focuses on rapid profit calculations, logic routing, and essential survival metrics.</p>
+                </div>
+                <div class="glass-card" onclick="startSequence('senior')">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔥</div>
+                    <h3>Level: Pro (11th - 2nd Yr)</h3>
+                    <p>High-pressure unit economics, complex algorithmic routing, and systems constraint analysis.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: The Console -->
+        <div class="screen" id="screen-game">
+            <div class="console-panel" id="console-panel">
+                <div class="console-header">
+                    <div class="step-indicator" id="ui-step">T-MINUS 10</div>
+                    <div class="crisis-title" id="ui-title">CRISIS DETECTED</div>
+                </div>
+                <div class="console-body">
+                    
+                    <div class="terminal-display">
+                        <div id="typewriter-text"></div>
+                        <div class="terminal-cursor"></div>
+                    </div>
+                    
+                    <div class="input-matrix" id="ui-matrix">
+                        <!-- Controls injected via JS -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: End Screen -->
+        <div class="screen" id="screen-end">
+            <h1 class="title" id="end-title">Simulation Terminated</h1>
+            <p class="subtitle" id="end-msg">Analyzing structural logs...</p>
+            <button class="execute-btn" onclick="location.reload()" style="max-width: 400px; background: transparent; border-color: var(--accent-3);">Reboot Systems</button>
+        </div>
+
+    </main>
+
+<script>
+    // --- Database of Time-Critical Puzzles ---
+    const db = {
+        junior: [
+            { type: 'keypad', title: "Margin Breach", time: 45, text: "CRITICAL: A supplier just raised material costs to $20/unit. To maintain exactly a $15 profit margin per unit, what must the new retail price be? Enter the exact dollar amount to patch the pricing algorithm.", answer: "35" },
+            { type: 'switches', title: "Overload Protocol", time: 40, text: "WARNING: Server capacity exceeded. We only have budget to keep 2 core features online. Flip the switches to deactivate 'Custom Avatars' and 'Live Chat', leaving only 'Core Engine' and 'Payment Gateway' active.", reqSwitches: ['s1', 's4'], options: [{id:'s1', label:'Core Engine'}, {id:'s2', label:'Custom Avatars'}, {id:'s3', label:'Live Chat'}, {id:'s4', label:'Payment Gateway'}] },
+            { type: 'sequence', title: "Launch Routing", time: 45, text: "ERROR: Logistics chain out of order. Route the product launch sequence in the exact correct order before the market opens: 1) Build MVP 2) Market Test 3) Mass Manufacture.", sequence: ['opt2', 'opt3', 'opt1'], options: [{id:'opt1', text:'Mass Manufacture'}, {id:'opt2', text:'Build MVP'}, {id:'opt3', text:'Market Test'}] },
+            { type: 'keypad', title: "Burn Rate Spike", time: 60, text: "ALERT: Cash reserves dropping. We have $100,000 left. We burn $20,000 every month. How many months of runway do we have before complete bankruptcy? Enter the integer.", answer: "5" },
+            { type: 'switches', title: "Target Isolation", time: 40, text: "MARKETING LEAK: We are wasting ad money targeting the wrong demographics. Flip the switches to ACTIVATE ads ONLY for 'College Students' and 'Young Professionals', deactivating all others.", reqSwitches: ['s2', 's3'], options: [{id:'s1', label:'Retirees'}, {id:'s2', label:'College Students'}, {id:'s3', label:'Young Professionals'}, {id:'s4', label:'Toddlers'}] },
+            { type: 'keypad', title: "Inventory Crash", time: 50, text: "SUPPLY CHAIN ALERT: We sell 10 items a day. The factory takes 4 days to deliver. What is the absolute minimum number of items we must have in stock to trigger a reorder without ever running out?", answer: "40" },
+            { type: 'sequence', title: "Bug Triage", time: 45, text: "FATAL ERROR: Users cannot check out. Sort the debugging priorities: 1) Fix broken 'Buy' button 2) Fix typo on About page 3) Change logo color.", sequence: ['opt1', 'opt2', 'opt3'], options: [{id:'opt3', text:'Change Logo Color'}, {id:'opt1', text:'Fix Buy Button'}, {id:'opt2', text:'Fix Typo'}] },
+            { type: 'switches', title: "Budget Cuts", time: 45, text: "RECESSION DETECTED: Must cut vanity expenses immediately. Keep 'R&D' and 'Customer Support' ON. Turn OFF 'Luxury Office Fruit' and 'Superbowl Ad'.", reqSwitches: ['s1', 's2'], options: [{id:'s1', label:'R&D'}, {id:'s3', label:'Superbowl Ad'}, {id:'s2', label:'Customer Support'}, {id:'s4', label:'Luxury Fruit'}] },
+            { type: 'keypad', title: "Equity Math", time: 50, text: "CAP TABLE: You own 100%. You give 20% to an investor, and 10% to a co-founder. What percentage of the company do you still own?", answer: "70" },
+            { type: 'sequence', title: "Customer Pipeline", time: 45, text: "FUNNEL BROKEN: Route the customer acquisition funnel correctly: 1) See Ad 2) Click to Website 3) Add to Cart 4) Purchase.", sequence: ['opt1', 'opt2', 'opt4', 'opt3'], options: [{id:'opt1', text:'See Ad'}, {id:'opt3', text:'Purchase'}, {id:'opt2', text:'Click to Website'}, {id:'opt4', text:'Add to Cart'}] }
+        ],
+        senior: [
+            { type: 'keypad', title: "LTV/CAC Algorithm", time: 60, text: "UNIT ECONOMICS ALERT: Venture capitalists demand an LTV:CAC ratio of exactly 3.0. If our Customer Acquisition Cost (CAC) is currently $40, what must our Customer Lifetime Value (LTV) be? Enter the exact dollar amount.", answer: "120" },
+            { type: 'switches', title: "Vanity Metric Purge", time: 45, text: "BOARD MEETING PREP: The dashboard is cluttered with useless data. Keep ONLY the actionable SaaS metrics ON: 'Monthly Recurring Rev' and 'Churn Rate'. Turn OFF the vanity metrics: 'Total Page Views' and 'Registered (Inactive) Users'.", reqSwitches: ['s2', 's4'], options: [{id:'s1', label:'Total Page Views'}, {id:'s2', label:'Monthly Recurring Rev'}, {id:'s3', label:'Registered Users'}, {id:'s4', label:'Churn Rate'}] },
+            { type: 'sequence', title: "Funding Chain", time: 50, text: "CAPITAL ROUTING: Order the startup funding lifecycle chronologically to unlock the capital: 1) Bootstrapping 2) Seed Round (Angel) 3) Series A (VC) 4) Initial Public Offering (IPO).", sequence: ['opt3', 'opt1', 'opt4', 'opt2'], options: [{id:'opt1', text:'Seed Round'}, {id:'opt2', text:'IPO'}, {id:'opt3', text:'Bootstrapping'}, {id:'opt4', text:'Series A'}] },
+            { type: 'keypad', title: "Bottleneck Capacity", time: 60, text: "SYSTEMS CONSTRAINT: Node A outputs 500/hr. Node B outputs 200/hr. Node C outputs 800/hr. We upgraded Node A by +400/hr. What is the total maximum output of the entire system now? Enter the integer.", answer: "200" },
+            { type: 'switches', title: "Crisis PR Protocol", time: 45, text: "DATA BREACH: A hack occurred. Select the ONLY two acceptable immediate actions to save company integrity: 'Patch the Security Flaw' and 'Email All Users Transparently'. DO NOT select 'Cover it up' or 'Fire the CTO'.", reqSwitches: ['s1', 's3'], options: [{id:'s1', label:'Patch Flaw'}, {id:'s2', label:'Cover it up'}, {id:'s3', label:'Email Users'}, {id:'s4', label:'Fire CTO'}] },
+            { type: 'keypad', title: "Expected Value", time: 60, text: "PROBABILITY ENGINE: Strategy A yields $10k guaranteed. Strategy B has a 50% chance of $50k and 50% chance of $0. Calculate the mathematical Expected Value of Strategy B. Enter the exact integer.", answer: "25000" },
+            { type: 'sequence', title: "Critical Path Setup", time: 55, text: "SCHEDULING CONFLICT: Reorder tasks to establish the Critical Path. 1) Market Research (Foundational) 2) Build Prototype (Depends on Research) 3) Beta Testing (Depends on Prototype).", sequence: ['opt2', 'opt3', 'opt1'], options: [{id:'opt1', text:'Beta Testing'}, {id:'opt2', text:'Market Research'}, {id:'opt3', text:'Build Prototype'}] },
+            { type: 'switches', title: "Nash Equilibrium", time: 45, text: "GAME THEORY ALERT: Rival is undercutting prices. Flip the switch to lock in the dominant strategy to prevent total zero-sum loss. Activate 'Price Match (Low)' and deactivate 'Hold Premium (High)' to survive the price war.", reqSwitches: ['s1'], options: [{id:'s1', label:'Price Match (Low)'}, {id:'s2', label:'Hold Premium (High)'}] },
+            { type: 'keypad', title: "Dilution Mechanics", time: 60, text: "EQUITY MATH: You own 1,000,000 shares (100%). We issue 250,000 BRAND NEW shares to an investor. What is your new ownership percentage of the total company? (Hint: 1M / 1.25M). Enter the integer.", answer: "80" },
+            { type: 'sequence', title: "Payment Logic Gate", time: 50, text: "CHECKOUT ERROR: Re-route the payment logic to prevent fraud: 1) Verify Auth Token 2) Validate Cart Total 3) Process Credit Card 4) Send Receipt.", sequence: ['opt2', 'opt4', 'opt1', 'opt3'], options: [{id:'opt1', text:'Process Credit Card'}, {id:'opt2', text:'Verify Auth Token'}, {id:'opt3', text:'Send Receipt'}, {id:'opt4', text:'Validate Cart Total'}] }
+        ]
+    };
+
+    let game = {
+        group: null, step: 0, health: 100, timer: 0, interval: null, 
+        currentInput: "", // For keypad
+        currentSwitches: [], // For switches
+        currentSeq: [] // For sequence
+    };
+
+    // --- Core Navigation ---
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+    function startSequence(group) {
+        game.group = group; game.step = 0; game.health = 100;
+        document.getElementById('health-bar').style.width = '100%';
+        document.getElementById('health-bar').style.backgroundColor = 'var(--success)';
+        document.querySelector('.hud').style.display = 'flex';
+        loadScenario();
+        showScreen('screen-game');
+    }
+
+    function loadScenario() {
+        if(game.health <= 0) return endGame(false);
+        if(game.step >= 10) return endGame(true);
+
+        const scenario = db[game.group][game.step];
+        
+        // Reset state
+        game.currentInput = ""; game.currentSwitches = []; game.currentSeq = [];
+        clearInterval(game.interval);
+        
+        document.getElementById('ui-step').innerText = `T-MINUS ${10 - game.step}`;
+        document.getElementById('ui-title').innerText = scenario.title;
+        
+        // Typewriter Effect
+        const tw = document.getElementById('typewriter-text');
+        tw.innerHTML = "";
+        let i = 0;
+        function typeWriter() {
+            if (i < scenario.text.length) {
+                tw.innerHTML += scenario.text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 15); // Fast typing
+            }
+        }
+        typeWriter();
+
+        // Build Interface
+        const matrix = document.getElementById('ui-matrix');
+        matrix.innerHTML = "";
+
+        if (scenario.type === 'keypad') {
+            matrix.innerHTML = `
+                <div class="keypad-display" id="kp-disp">_</div>
+                <div class="keypad-grid">
+                    ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="key-btn" onclick="kpPress('${n}')">${n}</button>`).join('')}
+                    <button class="key-btn action" onclick="kpClear()">CLR</button>
+                    <button class="key-btn" onclick="kpPress('0')">0</button>
+                    <button class="key-btn action" onclick="checkAnswer()">ENT</button>
+                </div>
+            `;
+        } else if (scenario.type === 'switches') {
+            let html = `<div class="switch-grid">`;
+            scenario.options.forEach(opt => {
+                html += `
+                    <div class="switch-row" id="sw-${opt.id}" onclick="toggleSwitch('${opt.id}')">
+                        <span class="switch-label">${opt.label}</span>
+                        <div class="switch-indicator"></div>
+                    </div>
+                `;
+            });
+            html += `</div><button class="execute-btn" onclick="checkAnswer()">Execute Protocol</button>`;
+            matrix.innerHTML = html;
+        } else if (scenario.type === 'sequence') {
+            let html = `<div class="sequence-dock" id="seq-dock">`;
+            scenario.sequence.forEach(() => html += `<div class="seq-slot">?</div>`);
+            html += `</div><div class="keypad-grid" style="grid-template-columns: 1fr 1fr;">`;
+            scenario.options.forEach(opt => {
+                html += `<button class="seq-btn" id="sq-${opt.id}" onclick="addToSeq('${opt.id}', '${opt.text}')">${opt.text}</button>`;
+            });
+            html += `</div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="execute-btn" style="background:transparent; border:1px solid var(--accent-1); margin-top:0;" onclick="clearSeq()">Reset</button>
+                <button class="execute-btn" style="margin-top:0;" onclick="checkAnswer()">Route Data</button>
+            </div>`;
+            matrix.innerHTML = html;
+        }
+
+        // Start Timer
+        game.timer = scenario.time;
+        updateTimerDisplay();
+        game.interval = setInterval(() => {
+            game.timer--;
+            updateTimerDisplay();
+            if(game.timer <= 0) {
+                clearInterval(game.interval);
+                handleFailure("TIME EXPIRED");
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const tDisp = document.getElementById('timer-display');
+        tDisp.innerText = `00:${game.timer < 10 ? '0'+game.timer : game.timer}`;
+        if(game.timer <= 10) tDisp.classList.add('warning');
+        else tDisp.classList.remove('warning');
+    }
+
+    // --- Input Logic ---
+    function kpPress(num) { game.currentInput += num; document.getElementById('kp-disp').innerText = game.currentInput; }
+    function kpClear() { game.currentInput = ""; document.getElementById('kp-disp').innerText = "_"; }
+    
+    function toggleSwitch(id) {
+        const el = document.getElementById(`sw-${id}`);
+        if(game.currentSwitches.includes(id)) {
+            game.currentSwitches = game.currentSwitches.filter(s => s !== id);
+            el.classList.remove('on');
+        } else {
+            game.currentSwitches.push(id);
+            el.classList.add('on');
+        }
+    }
+
+    function addToSeq(id, text) {
+        const scenario = db[game.group][game.step];
+        if(game.currentSeq.length >= scenario.sequence.length) return;
+        
+        game.currentSeq.push(id);
+        document.getElementById(`sq-${id}`).classList.add('used');
+        
+        const slots = document.querySelectorAll('.seq-slot');
+        slots[game.currentSeq.length - 1].innerText = text;
+        slots[game.currentSeq.length - 1].style.color = '#fff';
+    }
+
+    function clearSeq() {
+        game.currentSeq = [];
+        document.querySelectorAll('.seq-btn').forEach(b => b.classList.remove('used'));
+        document.querySelectorAll('.seq-slot').forEach(s => { s.innerText = '?'; s.style.color = 'var(--accent-3)'; });
+    }
+
+    // --- Evaluation Core ---
+    function checkAnswer() {
+        clearInterval(game.interval); // pause timer while checking
+        const scenario = db[game.group][game.step];
+        let isCorrect = false;
+
+        if (scenario.type === 'keypad') {
+            isCorrect = (game.currentInput === scenario.answer);
+        } else if (scenario.type === 'switches') {
+            // Must have exact same switches (no extra, none missing)
+            const sortedReq = [...scenario.reqSwitches].sort();
+            const sortedCur = [...game.currentSwitches].sort();
+            isCorrect = JSON.stringify(sortedReq) === JSON.stringify(sortedCur);
+        } else if (scenario.type === 'sequence') {
+            isCorrect = JSON.stringify(game.currentSeq) === JSON.stringify(scenario.sequence);
+        }
+
+        if (isCorrect) {
+            handleSuccess();
+        } else {
+            handleFailure("LOGIC ERROR");
+        }
+    }
+
+    function handleSuccess() {
+        showOverlay("SYSTEM OVERRIDE SUCCESS", true);
+        setTimeout(() => {
+            document.getElementById('status-msg').style.display = 'none';
+            game.step++;
+            loadScenario();
+        }, 1500);
+    }
+
+    function handleFailure(msg) {
+        game.health -= 25; // 4 strikes and you're out
+        updateHealthBar();
+        
+        const panel = document.getElementById('console-panel');
+        panel.classList.add('shake');
+        setTimeout(() => panel.classList.remove('shake'), 400);
+
+        showOverlay(`${msg} - INTEGRITY DAMAGED`, false);
+
+        setTimeout(() => {
+            document.getElementById('status-msg').style.display = 'none';
+            if(game.health <= 0) endGame(false);
+            else {
+                // PENALTY: They must retry the same level, but timer resets (or keeps ticking, but resetting is fairer so they don't instant-die).
+                loadScenario(); // Reloads same step
+            }
+        }, 2000);
+    }
+
+    function showOverlay(text, success) {
+        const overlay = document.getElementById('status-msg');
+        overlay.innerText = text;
+        overlay.className = 'msg-overlay ' + (success ? 'success' : '');
+        overlay.style.display = 'block';
+    }
+
+    function updateHealthBar() {
+        const bar = document.getElementById('health-bar');
+        bar.style.width = Math.max(0, game.health) + '%';
+        if(game.health <= 50) bar.style.backgroundColor = 'var(--accent-2)';
+        if(game.health <= 25) bar.style.backgroundColor = 'var(--danger)';
+    }
+
+    function endGame(survived) {
+        document.querySelector('.hud').style.display = 'none';
+        
+        const title = document.getElementById('end-title');
+        const msg = document.getElementById('end-msg');
+
+        if(survived) {
+            title.innerText = "LAUNCH SUCCESSFUL";
+            title.style.color = "var(--success)";
+            msg.innerText = "You navigated all 10 critical crises under extreme pressure. Your startup is airborne and fully operational.";
+        } else {
+            title.innerText = "STARTUP DESTROYED";
+            title.style.color = "var(--danger)";
+            msg.innerText = "Structural integrity reached 0%. You failed to solve the crises in time, and the market crushed your company.";
+        }
+        showScreen('screen-end');
+    }
+
+</script>
+</body>
+</html>
